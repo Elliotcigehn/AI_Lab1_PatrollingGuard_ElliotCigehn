@@ -11,12 +11,23 @@ public class GuardPatrol : MonoBehaviour
     NavMeshAgent _agent;
     public float patrolSpeed = 3.0f;
     public float chaseSpeed = 4.5f;
-    public int guardfov = 50;
-    
+    public float guardfov = 12f;
+    [Range(0, 360)] public float viewAngle = 90f;
+
+    public LayerMask playerMask;
+    public LayerMask obstacleMask;
+
+    public Transform eyes;
+
+
     public GuardState currentState = GuardState.Patrolling;
     public Transform player;
     public float chaseRange = 5.0f;
     public float loseRange = 7.0f;
+    public float searchDuration = 5.0f;
+    public float searchRadius = 3.0f;
+    private Vector3 lastKnownPlayerPosition;
+    private float searchTimer;
 
     public enum GuardState
     {
@@ -51,9 +62,41 @@ public class GuardPatrol : MonoBehaviour
             case GuardState.ReturnToPatrol:
                 UpdateReturnToPatrol();
                 break; 
+            case GuardState.Searching:
+                UpdateSearching();
+                break;
         }
     }
-    
+
+    bool CanSeePlayer()
+    {
+        Collider[] targetsInViewRadius =
+            Physics.OverlapSphere(transform.position, chaseRange, playerMask);
+
+        if (targetsInViewRadius.Length == 0)
+            return false;
+
+        Transform target = targetsInViewRadius[0].transform;
+
+        Vector3 dirToTarget = (target.position - eyes.position).normalized;
+        float angleToTarget = Vector3.Angle(eyes.forward, dirToTarget);
+
+        // Check cone angle
+        if (angleToTarget < viewAngle / 2)
+        {
+            float distToTarget = Vector3.Distance(eyes.position, target.position);
+
+            // Raycast for obstacles
+            if (!Physics.Raycast(eyes.position, dirToTarget, distToTarget, obstacleMask))
+            {
+                lastKnownPlayerPosition = target.position;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void UpdatePatrol()
     {
         if (wayPoints.Length == 0) return;
@@ -71,7 +114,7 @@ public class GuardPatrol : MonoBehaviour
             currentState = GuardState.Chasing;
         }*/ 
 
-        if (Physics.Raycast(transform.position, (player.position - transform.position).normalized, out RaycastHit hit, chaseRange))
+        /*if (Physics.Raycast(transform.position, (player.position - transform.position).normalized, out RaycastHit hit, chaseRange))
         {
             if (hit.transform == player)
             {
@@ -82,7 +125,12 @@ public class GuardPatrol : MonoBehaviour
                     currentState = GuardState.Chasing;
                 }
             }
+        }*/
+        if (CanSeePlayer())
+        {
+            currentState = GuardState.Chasing;
         }
+
     }
 
     void UpdateChase()
@@ -94,12 +142,21 @@ public class GuardPatrol : MonoBehaviour
             currentState = GuardState.ReturnToPatrol;
         }*/
 
-        if (Physics.Raycast(transform.position, (player.position - transform.position).normalized, out RaycastHit hit, chaseRange))
+        /*if (Physics.Raycast(transform.position, (player.position - transform.position).normalized, out RaycastHit hit, chaseRange))
         {
             if (hit.transform != player)
             {
-                currentState = GuardState.ReturnToPatrol;
+                currentState = GuardState.Searching;
+                searchTimer = searchDuration;
+                _agent.SetDestination(lastKnownPlayerPosition);
             }
+        }*/
+
+        if (!CanSeePlayer())
+        {
+            currentState = GuardState.Searching;
+            searchTimer = searchDuration;
+            _agent.SetDestination(lastKnownPlayerPosition);
         }
     }
 
@@ -130,6 +187,63 @@ public class GuardPatrol : MonoBehaviour
 
     void UpdateSearching()
     {
-        
+        searchTimer -= Time.deltaTime;
+
+        // If reached destination, wander around the area
+        if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
+        {
+            Vector3 randomPoint;
+            if (RandomPoint(lastKnownPlayerPosition, searchRadius, out randomPoint))
+            {
+                _agent.SetDestination(randomPoint);
+            }
+        }
+
+        if (CanSeePlayer())
+        {
+            currentState = GuardState.Chasing;
+        }
+
+        // Stop searching after time runs out
+        if (searchTimer <= 0f)
+        {
+            currentState = GuardState.ReturnToPatrol;
+        }
+    }
+    bool RandomPoint(Vector3 center, float range, out Vector3 result)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 randomPos = center + Random.insideUnitSphere * range;
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomPos, out hit, 1.0f, NavMesh.AllAreas))
+            {
+                result = hit.position;
+                return true;
+            }
+        }
+
+        result = center;
+        return false;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, chaseRange);
+
+        Vector3 leftBoundary = DirFromAngle(-viewAngle / 2);
+        Vector3 rightBoundary = DirFromAngle(viewAngle / 2);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(eyes.position, eyes.position + leftBoundary * chaseRange);
+        Gizmos.DrawLine(eyes.position, eyes.position + rightBoundary * chaseRange);
+    }
+
+    Vector3 DirFromAngle(float angle)
+    {
+        float rad = (angle + transform.eulerAngles.y) * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(rad), 0, Mathf.Cos(rad));
     }
 }
