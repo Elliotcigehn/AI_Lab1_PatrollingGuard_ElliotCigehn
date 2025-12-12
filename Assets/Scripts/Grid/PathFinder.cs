@@ -1,8 +1,7 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class PathFinder : MonoBehaviour
 {
@@ -11,17 +10,19 @@ public class PathFinder : MonoBehaviour
     [Header("Start & Goal Nodes")]
     public Transform startMarker;
     public Transform goalMarker;
+    public Transform chaseMarker;
 
     [Header("Materials")]
     public Material PathMaterial;
     public Material openMaterial;
     public Material closedMaterial;
+    public Material GoalMaterial;
 
     private List<Node> lastPath;
 
-    private InputAction findPathAction;
-
-    private List<Node> nodes = new List<Node>();
+    private InputAction pathfindAction;
+    private InputAction GoalAction;
+    private InputAction ChaseAction;
 
     private void RunPathFinding()
     {
@@ -36,29 +37,29 @@ public class PathFinder : MonoBehaviour
 
         if (startNode == null || goalNode == null)
         {
-            Debug.LogError("PathFinder: Start or Goal node is invalid.");
+            Debug.LogError("PathFinder: Start or Goal node is null.");
             return;
         }
 
         ResetGridVisuals();
 
 
-        HashSet<Node> openSetVisual = new HashSet<Node>();
-        HashSet<Node> closedSetVisual = new HashSet<Node>();
+        HashSet<Node> openVisual = new HashSet<Node>();
+        HashSet<Node> closedVisual = new HashSet<Node>();
 
-        lastPath = FindPath(startNode, goalNode, openSetVisual, closedSetVisual);
+        lastPath = FindPath(startNode, goalNode, openVisual, closedVisual);
 
-        foreach (var node in openSetVisual)
+        foreach (var node in openVisual)
         {
-            if (node.walkable)
+            if (node.Walkable)
             {
                 SetTileMaterialSafe(node, openMaterial);
             }
         }
 
-        foreach (var node in closedSetVisual)
+        foreach (var node in closedVisual)
         {
-            if (node.walkable)
+            if (node.Walkable)
             {
                 SetTileMaterialSafe(node, closedMaterial);
             }
@@ -82,97 +83,203 @@ public class PathFinder : MonoBehaviour
 
     private void ResetGridVisuals()
     {
-        return;
+        for (int x = 0; x < gridManager.width; x++)
+        {
+            for (int y = 0; y < gridManager.height; y++)
+            {
+                Node node = gridManager.GetNode(x, y);
+                if (node.Walkable)
+                {
+                    SetTileMaterialSafe(node, gridManager.walkableMaterial);
+                }
+                else
+                {
+                    SetTileMaterialSafe(node, gridManager.wallMaterial);
+                }
+            }
+        }
     }
 
     private void SetTileMaterialSafe(Node node, Material material)
     {
-        var renderer = node.tile.GetComponent<Renderer>();
+        var renderer = node.Tile.GetComponent<Renderer>();
         if (renderer != null && material != null)
         {
             renderer.material = material;
         }
     }
 
-    public List<Node> FindPath(Node startNode, Node goalNode, HashSet<Node> openSetVisual, HashSet<Node> closedSetVisual)
+    public List<Node> FindPath(Node startNode, Node goalNode, HashSet<Node> openVisual, HashSet<Node> closedVisual)
     {
-        var openSet = new SortedSet<Node>(Comparer<Node>.Create((a, b) =>
-        {
-            int compare = a.fCost.CompareTo(b.fCost);
-            if (compare == 0)
-                compare = a.hCost.CompareTo(b.hCost);
-            return compare;
-        }));
-        var cameFrom = new Dictionary<Node, Node>();
-        startNode.gCost = 0;
-        startNode.hCost = Heuristic(startNode, goalNode);
-        openSet.Add(startNode);
-        openSetVisual.Add(startNode);
+        gridManager.ResetAllNodes();
+
+        List<Node> openSet = new List<Node>(); // Nodes to be evaluated
+        HashSet<Node> closedSet = new HashSet<Node>(); // Nodes already evaluated
+
+        startNode.GCost = 0f; // Cost so far to reach start node is zero initially
+        startNode.HCost = Heuristic(startNode, goalNode); // First guess, from start to goal
+        openSet.Add(startNode); // Add start node to open set, we will evaluate it first
+        openVisual?.Add(startNode);
+
         while (openSet.Count > 0)
         {
-            Node current = openSet.Min;
+            // Get node in open set with lowest F cost
+            Node current = GetLowestFCostNode(openSet);
+
             if (current == goalNode)
             {
-                return ReconstructPath(cameFrom, current);
+                // Found our goal node
+                // When we reach here, we can reconstruct the path
+                // by following parent nodes from goal to start
+                return ReconstructPath(startNode, goalNode);
             }
+
             openSet.Remove(current);
-            openSetVisual.Remove(current);
-            closedSetVisual.Add(current);
-            foreach (var neighbor in gridManager.GetNeighbors(current))
+            closedSet.Add(current); // Mark current node as evaluated
+            closedVisual?.Add(current);
+
+            // Explore neighbours to see if we can find a better path
+            foreach (Node neighbour in gridManager.GetNeighbours(current))
             {
-                if (neighbor == null || !neighbor.walkable || closedSetVisual.Contains(neighbor))
+                if (neighbour == null || !neighbour.Walkable)
+                    // Skip non-walkable or null neighbours
                     continue;
-                float tentativeGCost = current.gCost + 1;
-                if (tentativeGCost < neighbor.gCost)
+                if (closedSet.Contains(neighbour))
+                    // Already evaluated
+                    continue;
+
+                // cost(current, neighbour) = 1. Unweighted grid.
+                // Tentative = cost so far to reach neighbour
+                float tentativeG = current.GCost + 1f;
+
+                if (tentativeG < neighbour.GCost)
                 {
-                    cameFrom[neighbor] = current;
-                    neighbor.gCost = tentativeGCost;
-                    neighbor.hCost = Heuristic(neighbor, goalNode);
-                    if (!openSet.Contains(neighbor))
+                    // Found a better path to neighbour
+                    neighbour.Parent = current;
+                    neighbour.GCost = tentativeG; // Update cost to reach neighbour
+                    neighbour.HCost = Heuristic(neighbour, goalNode);
+
+                    if (!openSet.Contains(neighbour))
                     {
-                        openSet.Add(neighbor);
-                        openSetVisual.Add(neighbor);
+                        openSet.Add(neighbour);
+                        openVisual?.Add(neighbour);
                     }
                 }
             }
         }
-        return null; // No path found
+
+        // No path found
+        return null;
+    }
+
+    private Node GetLowestFCostNode(List<Node> openSet)
+    {
+        Node best = openSet[0]; // Assume first node is best initially
+        for (int i = 1; i < openSet.Count; i++)
+        {
+            // For each node, check if its F cost is lower than the best found so far
+            Node candidate = openSet[i];
+            if (candidate.FCost < best.FCost ||
+                Mathf.Approximately(candidate.FCost, best.FCost) && candidate.HCost < best.HCost)
+            {
+                best = candidate;
+            }
+        }
+        return best;
     }
     private float Heuristic(Node a, Node b)
     {
         //return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
-        int dx = Mathf.Abs(a.x - b.x);
-        int dy = Mathf.Abs(a.y - b.y);
+        int dx = Mathf.Abs(a.X - b.X);
+        int dy = Mathf.Abs(a.Y - b.Y);
         return dx + dy;
     }
-    private List<Node> ReconstructPath(Dictionary<Node, Node> cameFrom, Node current)
+    private List<Node> ReconstructPath(Node startNode, Node goalNode)
     {
-        List<Node> totalPath = new List<Node> { current };
-        while (cameFrom.ContainsKey(current))
+        List<Node> path = new List<Node>();
+        Node current = goalNode;
+
+        while (current != null)
         {
-            current = cameFrom[current];
-            totalPath.Insert(0, current);
+            path.Add(current);
+            if (current == startNode)
+                break;
+            current = current.Parent;
         }
-        foreach (var node in totalPath)
-        {
-            node.tile.GetComponent<Renderer>().material = PathMaterial;
-        }
-        return totalPath;
+
+        path.Reverse(); // Reverse to get path from start to goal
+        return path;
     }
 
     private void OnEnable()
     {
-        findPathAction.Enable();
-        findPathAction = InputSystem.actions["Player/Interact"];
+        pathfindAction = new InputAction(
+            name: "FindPath",
+            type: InputActionType.Button,
+            binding: "<Keyboard>/f"
+        );
+        pathfindAction.performed += OnPathFinderPerformed;
+        pathfindAction.Enable();
+
+        GoalAction = new InputAction(
+            name: "SetGoal",
+            type: InputActionType.Button,
+            binding: "<Keyboard>/e"
+        );
+        GoalAction.performed -= ctx => SetGoalNode(); // Unsubscribe first to avoid multiple subscriptions
+        GoalAction.performed += ctx => SetGoalNode(); // Subscribe to event
+        GoalAction.Enable();
+
+        ChaseAction = new InputAction(
+            name: "ChaseGoal",
+            type: InputActionType.Button,
+            binding: "<Keyboard>/q"
+        );
+        ChaseAction.performed -= ctx => SetChaseNode(); // Unsubscribe first to avoid multiple subscriptions
+        ChaseAction.performed += ctx => SetChaseNode(); // Subscribe to event
+        ChaseAction.Enable();
     }
 
     private void OnDisable()
     {
-        if (findPathAction != null)
+        if (pathfindAction != null)
         {
-            findPathAction.performed -= ctx => RunPathFinding();
-            findPathAction.Disable();
+            pathfindAction.performed -= OnPathFinderPerformed;
+            pathfindAction.Disable();
         }
+        if (GoalAction != null)
+        {
+            GoalAction.performed -= ctx => SetGoalNode();
+            GoalAction.Disable();
+        }
+    }
+
+    private void OnPathFinderPerformed(InputAction.CallbackContext context)
+    {
+        RunPathFinding();
+    }
+
+    private void SetGoalNode()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+        {
+            Vector3 mousePosition = hitInfo.collider.gameObject.transform.position;
+            gridManager.SetTileMaterial(gridManager.GetNodeFromWorldPosition(mousePosition), GoalMaterial);
+            if (goalMarker != null)
+            {
+                gridManager.SetTileMaterial(gridManager.GetNodeFromWorldPosition(goalMarker.position), gridManager.walkableMaterial);
+                goalMarker = null;
+            }
+            goalMarker = hitInfo.collider.transform;
+            return;
+        }
+
+    }
+
+    private void SetChaseNode()
+    {
+        goalMarker = chaseMarker;
     }
 
 }
