@@ -15,6 +15,11 @@ public class Agent_Mover : MonoBehaviour
 
     private InputAction followAction;
 
+    private void LateUpdate()
+    {
+        StartFollowPath();
+    }
+
     private void OnEnable()
     {
         followAction = new InputAction(
