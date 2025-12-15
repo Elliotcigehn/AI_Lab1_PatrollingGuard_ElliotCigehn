@@ -45,6 +45,8 @@ GameObject:
   - component: {fileID: 1500621217815775541}
   - component: {fileID: 1405340363194690195}
   - component: {fileID: 6798514246093266224}
+  - component: {fileID: -2565936656226538081}
+  - component: {fileID: 7798213348614489384}
   m_Layer: 0
   m_Name: Guard
   m_TagString: Untagged
@@ -173,14 +175,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7608980916793183739}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9e290d821a768742be3331e6a365ef4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   wayPoints:
-  - {fileID: 0}
-  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -202,3 +202,63 @@ MonoBehaviour:
   loseRange: 9
   searchDuration: 10
   searchRadius: 3
+--- !u!114 &-2565936656226538081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608980916793183739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Graph: {fileID: 4641483655377481682, guid: 89f81c213e9ba2646bb564c1457bc00d, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 32784485948588313
+  - rid: 32784490174349986
+  m_OriginalGraph: {fileID: 4641483655377481682, guid: 89f81c213e9ba2646bb564c1457bc00d, type: 2}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 32784485948588313
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 7608980916793183739}
+    - rid: 32784490174349986
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 8397256103580950180
+          m_Value1: 8343523243172927517
+        Name: Waypoints
+        m_Value:
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+--- !u!114 &7798213348614489384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608980916793183739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc80b6aeb59b0ab468bda8b9502aaa8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetTag: Player
+  sightRange: 10
+  sightAngle: 90
+  obstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  eyes: {fileID: 8871846809928517669}
