@@ -125,10 +125,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 5
   maxForce: 10
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  lookAheadDistance: 5
+  obstacleAvoidanceStrength: 10
+  obstacleAvoidanceRadius: 2
   slowingRadius: 3
   separationRadius: 1.5
   separationStrength: 5
   arriveWeight: 1
   separationWeight: 1
+  obstacleAvoidanceWeight: 10
   drawDebug: 1
   target: {fileID: 0}
