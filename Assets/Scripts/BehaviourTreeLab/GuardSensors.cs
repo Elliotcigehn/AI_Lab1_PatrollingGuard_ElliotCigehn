@@ -14,6 +14,8 @@ public class GuardSensors : MonoBehaviour
 
     [SerializeField]private Transform cachedTarget;
 
+    public GameObject Target;
+
     public float SightRange => sightRange;
     public float SightAngle => sightAngle;
 
@@ -45,12 +47,19 @@ public class GuardSensors : MonoBehaviour
         float angle = Vector3.Angle(EyesTransform.forward, toTargetDir);
         if (angle > halfAngle) return false;
 
-        if (Physics.Raycast(eyePos, toTargetDir, out RaycastHit hit, dist, obstructionMask))
+        if (Physics.Raycast(eyePos, toTarget, out RaycastHit hit, sightRange, obstructionMask))
         {
             if (hit.transform != cachedTarget)
             {
                 return false;
             }
+            if (hit.transform == cachedTarget)
+            {
+                target = Target;
+                lastKnownPosition = cachedTarget.position;
+                hasLineOfSight = true;
+            }
+
         }
         target = cachedTarget.gameObject;
         lastKnownPosition = cachedTarget.position;

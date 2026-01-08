@@ -819,6 +819,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1976438932}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &640928083 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7875360336552094200, guid: e18a008b01d65ed4e95d247f585c2753, type: 3}
+  m_PrefabInstance: {fileID: 958717742}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &745817251
 GameObject:
   m_ObjectHideFlags: 0
@@ -904,11 +909,11 @@ PrefabInstance:
     - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: m_Graph
       value: 
-      objectReference: {fileID: 4641483655377481682, guid: 89f81c213e9ba2646bb564c1457bc00d, type: 2}
+      objectReference: {fileID: 4641483655377481682, guid: 095122908c2aec9468c5b3c220c2a41f, type: 2}
     - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: m_OriginalGraph
       value: 
-      objectReference: {fileID: 4641483655377481682, guid: 89f81c213e9ba2646bb564c1457bc00d, type: 2}
+      objectReference: {fileID: 4641483655377481682, guid: 095122908c2aec9468c5b3c220c2a41f, type: 2}
     - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: 'managedReferences[32784485948588314]'
       value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[UnityEngine.GameObject,
@@ -1968,6 +1973,60 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: 'managedReferences[3815558434288304833]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[UnityEngine.GameObject,
+        UnityEngine.CoreModule]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: 'managedReferences[3815558434900673393]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[Unity.Behavior.NavigateToTargetAction/TargetPositionMode,
+        Unity.Behavior]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434288304833].Name
+      value: Target
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434900673393].Name
+      value: New TargetPositionMode
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: m_BlackboardVariableOverridesList.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434288304833].m_Value
+      value: 
+      objectReference: {fileID: 640928083}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434900673393].m_Value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[2]'
+      value: 3815558434288304833
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[3]'
+      value: 3815558434900673393
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434288304833].GUID.m_Value0
+      value: 17591303329559662768
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434288304833].GUID.m_Value1
+      value: 14418023246889354694
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434900673393].GUID.m_Value0
+      value: 18138460087576631325
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: managedReferences[3815558434900673393].GUID.m_Value1
+      value: 17150897301546633025
+      objectReference: {fileID: 0}
+    - target: {fileID: -2565936656226538081, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: 'managedReferences[32784490174349986].m_Value.Array.data[0]'
       value: 
       objectReference: {fileID: 1418341637}
@@ -2036,12 +2095,20 @@ PrefabInstance:
       value: Guard
       objectReference: {fileID: 0}
     - target: {fileID: 7798213348614489384, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: Target
+      value: 
+      objectReference: {fileID: 640928083}
+    - target: {fileID: 7798213348614489384, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: cachedTarget
       value: 
       objectReference: {fileID: 164440915}
     - target: {fileID: 7798213348614489384, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
       propertyPath: obstructionMask.m_Bits
-      value: 4294967295
+      value: 119
+      objectReference: {fileID: 0}
+    - target: {fileID: 8871846809928517669, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.58
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6798514246093266224, guid: 1de24849d6e480e409b88d6a4e09f948, type: 3}
